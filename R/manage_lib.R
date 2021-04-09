@@ -88,13 +88,18 @@ check_lib <- function(which = c("ftir", "raman"),
 #'
 #' @importFrom utils read.csv
 #' @importFrom osfr osf_retrieve_node osf_ls_files osf_download
+#' @importFrom httr http_error
 #'
 #' @export
 get_lib <- function(which = c("ftir", "raman"),
                     types = c("metadata", "library", "peaks"),
                     path = "system",
                     node = "x7dpz", conflicts = "overwrite", ...) {
-  lp <- ifelse(path == "system",
+  if (httr::http_error(paste("https://osf.io/",node, sep = ""))) { # network is down = message (not an error anymore)
+    message("No internet connection or data source broken.")
+    return(NULL)
+  } else { # network is up = proceed to download via curl
+ lp <- ifelse(path == "system",
                system.file("extdata", package = "OpenSpecy"),
                path)
 
@@ -110,6 +115,8 @@ get_lib <- function(which = c("ftir", "raman"),
   }
 
   message("Use 'load_lib()' to load the library")
+    
+  } # /if - network up or down
 }
 
 #' @rdname manage_lib
